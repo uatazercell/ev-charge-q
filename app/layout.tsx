@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "EV Charging Queue",
-  description: "Office Yard Charging Slots"
+  description: "Azercell Office Yard Charging Slots"
 };
 
 export default function RootLayout({
