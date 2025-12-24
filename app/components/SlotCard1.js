@@ -89,6 +89,7 @@ export default function SlotCard({ slot, updateSlot }) {
 
                         <input
                             type="time"
+                            placeholder="choose time"
                             value={endTime}
                             required
                             onChange={e => setEndTime(e.target.value)}
