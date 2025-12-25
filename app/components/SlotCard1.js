@@ -246,6 +246,7 @@ export default function SlotCard({ slot, updateSlot }) {
                                         }
                                         try {
                                             localStorage.removeItem('evUser');
+                                            setCurrentUser("");
                                         } catch (e) {
                                             // ignore
                                         }
