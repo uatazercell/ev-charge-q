@@ -12,21 +12,21 @@ export default function SlotCard({ slot, updateSlot }) {
     const [editEndTime, setEditEndTime] = useState("");
 
     useEffect(() => {
+        checkLSUser() && setCurrentUser(checkLSUser());
+    }, []);
+
+    const checkLSUser = () => {
         try {
             const u = localStorage.getItem("evUser");
-            if (u) setCurrentUser(u);
+            return u || "";
         } catch (e) {
             // ignore
         }
-    }, []);
+    };
 
     const handleOccupy = () => {
-        if (!name.trim() || !endTime) {
-            setError("Name and end time are required");
-            return;
-        }
-
-        if (currentUser.trim()) {
+        let u = checkLSUser()
+        if (u.trim()) {
             setError("You already have an active or reserved slot");
             return;
         }
