@@ -109,7 +109,7 @@ button {
   border: none;
   font-size: 14px;
   background: #7bd493;
-  color: white;
+  color: #000 !important;
   opacity: 1;
 }
 button:disabled {
@@ -121,7 +121,7 @@ button.secondary {
 }
 
 button.danger {
-  background: #dc2626;
+  background: #f36060 !important;
 }
 
 /* Desktop enhancement */

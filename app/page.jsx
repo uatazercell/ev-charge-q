@@ -34,7 +34,7 @@ export default function HomePage() {
         </div>
         <button
           onClick={() => setIsMapOpen(prev => !prev)}
-          className="px-4 py-2 !bg-blue-400 text-white rounded"
+          className="px-4 py-2 !bg-blue-400 !text-white rounded"
         >
           Slots map</button>
       </div>

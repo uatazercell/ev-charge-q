@@ -26,6 +26,11 @@ export default function SlotCard({ slot, updateSlot }) {
             return;
         }
 
+        if (currentUser.trim()) {
+            setError("You already have an active or reserved slot");
+            return;
+        }
+
         setError("");
         updateSlot(slot.id, {
             occupied: true,
@@ -182,7 +187,7 @@ export default function SlotCard({ slot, updateSlot }) {
                                     onChange={e => setReservation(e.target.value)}
                                 />
                                 <button
-                                    className="secondary"
+                                    className="!bg-purple-400"
                                     onClick={() => {
                                         const r = reservation && reservation.trim();
                                         if (!r) return;
@@ -204,8 +209,15 @@ export default function SlotCard({ slot, updateSlot }) {
                         {slot.reservation && currentUser && slot.reservation.trim() === currentUser.trim() && (
                             <button
                                 className="secondary"
-                                onClick={() =>
-                                    updateSlot(slot.id, { reservation: "" })
+                                onClick={() => {
+                                    try {
+                                        localStorage.removeItem('evUser');
+                                        setCurrentUser("");
+                                        updateSlot(slot.id, { reservation: "" })
+                                    } catch (e) {
+                                        // ignore
+                                    }
+                                }
                                 }
                             >
                                 Unreserve
@@ -232,9 +244,15 @@ export default function SlotCard({ slot, updateSlot }) {
                                                 reservation: ""
                                             })
                                         }
+                                        try {
+                                            localStorage.removeItem('evUser');
+                                        } catch (e) {
+                                            // ignore
+                                        }
+
                                     }}
                                 >
-                                    Mark as Free
+                                    Stop Charging
                                 </button>
                             </>
                         )}
