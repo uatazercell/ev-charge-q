@@ -7,6 +7,7 @@ import SlotCard from "./components/SlotCard1";
 
 export default function HomePage() {
   const [slots, setSlots] = useState([]);
+  const [isMapOpen, setIsMapOpen] = useState(false);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "slots"), snapshot => {
@@ -26,8 +27,23 @@ export default function HomePage() {
 
   return (
     <main className="container">
-      <h1>EV Charging Queue</h1>
-      <p className="subtitle">Office Yard</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1>EV Charging Queue</h1>
+          <p className="subtitle">Azercell Office Yard</p>
+        </div>
+        <button
+          onClick={() => setIsMapOpen(prev => !prev)}
+          className="px-4 py-2 !bg-blue-400 text-white rounded"
+        >
+          Slots map</button>
+      </div>
+
+      {isMapOpen && (
+        <div className="map-container my-4">
+          <img src="/image.jpg" alt="EV Charging Slots Map" className="map-image" />
+        </div>
+      )}
 
       {slots.map(slot => (
         <SlotCard
