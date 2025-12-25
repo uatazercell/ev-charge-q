@@ -41,7 +41,7 @@ export default function HomePage() {
 
       {isMapOpen && (
         <div className="map-container my-4">
-          <img src="/image.jpg" alt="EV Charging Slots Map" className="map-image" />
+          <img src="/Image.jpg" alt="EV Charging Slots Map" className="map-image" />
         </div>
       )}
 

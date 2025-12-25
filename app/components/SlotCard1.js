@@ -174,7 +174,7 @@ export default function SlotCard({ slot, updateSlot }) {
 
                 {slot.occupied && (
                     <>
-                        {!slot.reservation && (
+                        {!slot.reservation && !currentUser && (
                             <>
                                 <input
                                     placeholder="Reserve name"
