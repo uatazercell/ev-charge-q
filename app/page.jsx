@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { collection, doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "./lib/firebase";
-import SlotCard from "./components/SlotCard1";
+import SlotCard from "./components/SlotCard";
 
 export default function HomePage() {
   const [slots, setSlots] = useState([]);
@@ -27,16 +27,19 @@ export default function HomePage() {
 
   return (
     <main className="container">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
+        <img src="./ev_charging_q_logo.png" alt="logo" className="w-[45px]" />
         <div>
-          <h1>EV Charging Queue</h1>
+          <h1>EV Charging Q</h1>
           <p className="subtitle">Azercell Office Yard</p>
         </div>
         <button
           onClick={() => setIsMapOpen(prev => !prev)}
           className="px-4 py-2 !bg-blue-400 !text-white rounded"
         >
-          Slots map</button>
+          <span className="align-text-bottom">Slots </span>
+          <span className="text-lg">&#128712;</span>
+        </button>
       </div>
 
       {isMapOpen && (
