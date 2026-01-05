@@ -36,9 +36,9 @@ export default function HomePage() {
         <button
           onClick={() => setIsMapOpen(prev => !prev)}
           className="px-4 py-2 !bg-blue-400 !text-white rounded"
-        >
-          <span className="align-text-bottom">Slots </span>
-          <span className="text-lg">&#128712;</span>
+        >Slots
+          {/* <span className="align-text-bottom">Slots </span> */}
+          {/* <span className="text-lg">&#8505;</span> */}
         </button>
       </div>
 
