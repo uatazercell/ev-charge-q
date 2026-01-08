@@ -38,8 +38,6 @@ export default function HomePage() {
           onClick={() => setIsMapOpen(prev => !prev)}
           className="px-4 py-2 !bg-blue-400 !text-white rounded"
         >Slots
-          {/* <span className="align-text-bottom">Slots </span> */}
-          {/* <span className="text-lg">&#8505;</span> */}
         </button>
       </div>
 
@@ -57,7 +55,12 @@ export default function HomePage() {
         />
       ))}
 
-      <Link href="/manual" className="underline">See User Manual</Link>
+      <Link
+        href="/User guide for EV charging Q.pdf"
+        className="underline"
+        target="_blank"
+        rel="noopener noreferrer"
+      >See User Manual</Link>
     </main>
   );
 }
