@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "./lib/firebase";
 import SlotCard from "./components/SlotCard";
+import Link from "next/link";
 
 export default function HomePage() {
   const [slots, setSlots] = useState([]);
@@ -55,6 +56,8 @@ export default function HomePage() {
           updateSlot={updateSlot}
         />
       ))}
+
+      <Link href="/manual" className="underline">See User Manual</Link>
     </main>
   );
 }
