@@ -24,6 +24,26 @@ export default function SlotCard({ slot, updateSlot }) {
         }
     };
 
+    const handleReserve = () => {
+        const r = reservation && reservation.trim();
+        if (!r) return;
+
+        let u = checkLSUser()
+        if (u.trim()) {
+            setError("You already have an active or reserved slot");
+            return;
+        }
+        
+        try {
+            localStorage.setItem("evUser", r);
+            setCurrentUser(r);
+        } catch (e) {
+            // ignore
+        }
+        updateSlot(slot.id, { reservation: r });
+        setReservation("");
+    }
+
     const handleOccupy = () => {
         let u = checkLSUser()
         if (u.trim()) {
@@ -37,6 +57,8 @@ export default function SlotCard({ slot, updateSlot }) {
             user: name,
             endTime
         });
+
+        alert("Don't forget to STOP charging when you're done!!");
 
         try {
             localStorage.setItem("evUser", name);
@@ -186,20 +208,14 @@ export default function SlotCard({ slot, updateSlot }) {
                                     value={reservation}
                                     onChange={e => setReservation(e.target.value)}
                                 />
+                                {error && (
+                                    <span style={{ color: "#dc2626", fontSize: "12px" }}>
+                                        {error}
+                                    </span>
+                                )}
                                 <button
                                     className="!bg-purple-400"
-                                    onClick={() => {
-                                        const r = reservation && reservation.trim();
-                                        if (!r) return;
-                                        try {
-                                            localStorage.setItem("evUser", r);
-                                            setCurrentUser(r);
-                                        } catch (e) {
-                                            // ignore
-                                        }
-                                        updateSlot(slot.id, { reservation: r });
-                                        setReservation("");
-                                    }}
+                                    onClick={handleReserve}
                                 >
                                     Reserve Slot
                                 </button>
