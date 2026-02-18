@@ -3,18 +3,20 @@ import { doc, updateDoc } from "firebase/firestore";
 import { useState } from "react";
 import { db } from "../lib/firebase";
 
+const emptySlotUpdate = { user: "", occupied: false, endTime: "", reservation: "" };
+
 export default function Admin() {
     const [showUI, setShowUI] = useState(false);
 
     const handleRemoveOccupant = async (id: number) => {
-        await updateDoc(doc(db, "slots", String(id)), { user: "", occupied: false, endTime: "" });
+        await updateDoc(doc(db, "slots", String(id)), emptySlotUpdate);
     };
     const handleRemoveReservator = async (id: number) => {
         await updateDoc(doc(db, "slots", String(id)), { reservation: "" });
     };
     const handleClearSlots = async () => {
         for (let i = 1; i <= 6; i++) {
-            await updateDoc(doc(db, "slots", String(i)), { user: "", occupied: false, endTime: "", reservation: "" });
+            await updateDoc(doc(db, "slots", String(i)), emptySlotUpdate);
         }
     };
 
@@ -32,8 +34,7 @@ export default function Admin() {
                         Clear all slots
                     </button>
 
-                    {/* nujna dorabotka */}
-                    {/* {[1, 2, 3, 4, 5, 6].map((card) => (
+                    {[1, 2, 3, 4, 5, 6].map((card) => (
                         <div key={card} className="card p-4 shadow">
                             <h2 className="card-header">Slot {card}</h2>
                             <div className="flex justify-center gap-2 mt-4">
@@ -51,7 +52,7 @@ export default function Admin() {
                                 </button>
                             </div>
                         </div>
-                    ))} */}
+                    ))}
                 </div>
             )}
         </div>
