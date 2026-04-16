@@ -1,78 +1,132 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { FaUser, FaUserFriends, FaEnvelope, FaCar, FaEdit, FaPhoneAlt } from "react-icons/fa";
+import { IoTime } from "react-icons/io5";
 
-export default function SlotCard({ slot, updateSlot }) {
-    const [name, setName] = useState("");
-    const [endTime, setEndTime] = useState("");
-    const [reservation, setReservation] = useState("");
+
+export default function SlotCard({ slot, updateSlot, currentUser, allSlots }) {
     const [error, setError] = useState("");
-    const [currentUser, setCurrentUser] = useState("");
+    const [endTime, setEndTime] = useState("");
     const [isEditingTime, setIsEditingTime] = useState(false);
     const [editEndTime, setEditEndTime] = useState("");
 
-    useEffect(() => {
-        checkLSUser() && setCurrentUser(checkLSUser());
-    }, []);
-
-    const checkLSUser = () => {
-        try {
-            const u = localStorage.getItem("evUser");
-            return u || "";
-        } catch (e) {
-            // ignore
-        }
-    };
+    const userId = currentUser?.uid;
+    const userName = `${currentUser?.name} ${currentUser?.surname}` || "";
+    const hasOtherSlot = allSlots.some((s) => s.id !== slot.id && (s.userId === userId || s.reservationId === userId));
+    const isCurrentOccupant = slot.userId === userId;
+    const isCurrentReserver = slot.reservationId === userId;
+    const selectedEndTime = endTime.trim() || slot.endTime || "";
 
     const handleReserve = () => {
-        const r = reservation && reservation.trim();
-        if (!r) return;
-
-        let u = checkLSUser()
-        if (u.trim()) {
-            setError("You already have an active or reserved slot");
-            return;
-        }
-        
-        try {
-            localStorage.setItem("evUser", r);
-            setCurrentUser(r);
-        } catch (e) {
-            // ignore
-        }
-        updateSlot(slot.id, { reservation: r });
-        setReservation("");
-    }
-
-    const handleOccupy = () => {
-        let u = checkLSUser()
-        if (u.trim()) {
-            setError("You already have an active or reserved slot");
-            return;
-        }
-
         setError("");
-        updateSlot(slot.id, {
-            occupied: true,
-            user: name,
-            endTime
-        });
-
-        alert("Don't forget to STOP charging when you're done!!");
-
-        try {
-            localStorage.setItem("evUser", name);
-            setCurrentUser(name);
-        } catch (e) {
-            // ignore
+        if (!userId) {
+            setError("You must be logged in to reserve a slot.");
+            return;
         }
 
-        setName("");
+        if (slot.reservationId) {
+            setError("This slot is already reserved.");
+            return;
+        }
+
+        if (hasOtherSlot && !isCurrentReserver) {
+            setError("You already have another occupied or reserved slot.");
+            return;
+        }
+
+        updateSlot(slot.id, {
+            reservation: userName,
+            reservationId: userId,
+            reservationEmail: currentUser?.email || "",
+            reservationPlate: currentUser?.vehiclePlateNumber || "",
+        });
         setEndTime("");
     };
 
+    const handleOccupy = () => {
+        setError("");
+        if (!userId) {
+            setError("You must be logged in to occupy a slot.");
+            return;
+        }
+
+        if (hasOtherSlot && !isCurrentOccupant) {
+            setError("You already have another occupied or reserved slot.");
+            return;
+        }
+
+        if (!selectedEndTime) {
+            setError("Please enter the end time before starting charging.");
+            return;
+        }
+
+        updateSlot(slot.id, {
+            occupied: true,
+            endTime: selectedEndTime,
+            user: userName,
+            email: currentUser?.email || "",
+            userId,
+            vehiclePlate: currentUser?.vehiclePlateNumber || "",
+            mobileNumber: currentUser?.mobileNumber || "",
+            reservation: "",
+            reservationId: "",
+            reservationEmail: "",
+            reservationPlate: "",
+            reservationMobileNumber: "",
+        });
+        setEndTime("");
+    };
+
+    const handleCancelReservation = () => {
+        setError("");
+        updateSlot(slot.id, {
+            reservation: "",
+            reservationId: "",
+            reservationEmail: "",
+            reservationPlate: "",
+            reservationMobileNumber: "",
+        });
+    };
+
+    const handleStopCharging = () => {
+        setError("");
+        if (slot.reservationId) {
+            // Transfer reservation to occupation
+            updateSlot(slot.id, {
+                occupied: true,
+                endTime: "",
+                user: slot.reservation,
+                email: slot.reservationEmail,
+                userId: slot.reservationId,
+                vehiclePlate: slot.reservationPlate,
+                mobileNumber: slot.reservationMobileNumber,
+                reservation: "",
+                reservationId: "",
+                reservationEmail: "",
+                reservationPlate: "",
+                reservationMobileNumber: "",
+            });
+        } else {
+            updateSlot(slot.id, {
+                occupied: false,
+                endTime: "",
+                user: "",
+                email: "",
+                userId: "",
+                vehiclePlate: "",
+                mobileNumber: "",
+                reservation: "",
+                reservationId: "",
+                reservationEmail: "",
+                reservationPlate: "",
+                reservationMobileNumber: "",
+            });
+        }
+    };
+
     return (
-        <div className="card">
+        <div className="card shadow">
             <div className="card-header">
                 <strong>Slot {slot.id} {slot.id == 2 ? "EU" : slot.id == 4 ? "US" : "CN"}</strong>
                 <span className={`badge ${slot.occupied ? "red" : "green"}`}>
@@ -83,86 +137,70 @@ export default function SlotCard({ slot, updateSlot }) {
             <div className="details">
                 {slot.occupied && (
                     <>
-                        <div className="flex gap-1 items-center">
-                            <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4.51555 7C3.55827 8.4301 3 10.1499 3 12C3 16.9706 7.02944 21 12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3V6M12 12L8 8" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-
-                            <p>Until: {slot.endTime}</p>
-
-                            {slot.user && currentUser && slot.user.trim() === currentUser.trim() && (
-                                <p
-                                    className="!ml-2"
-                                    onClick={() => {
-                                        setEditEndTime(slot.endTime || "");
-                                        setIsEditingTime(true);
-                                    }}
-                                >
-                                    <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C17.8754 2.49308 18.1605 2.28654 18.4781 2.14284C18.7956 1.99914 19.139 1.92124 19.4875 1.9139C19.8359 1.90657 20.1823 1.96991 20.5056 2.10012C20.8289 2.23033 21.1225 2.42473 21.3686 2.67153C21.6147 2.91833 21.8083 3.21243 21.9376 3.53609C22.0669 3.85976 22.1294 4.20626 22.1211 4.55471C22.1128 4.90316 22.0339 5.24635 21.8894 5.5635C21.7448 5.88065 21.5375 6.16524 21.2799 6.40005V6.40005Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </p>
-                            )}
-
-                            {isEditingTime && (
-                                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                                    <input
-                                        type="time"
-                                        value={editEndTime}
-                                        onChange={e => setEditEndTime(e.target.value)}
-                                    />
-                                    <button
-                                        className="primary px-3"
-                                        onClick={() => {
-                                            const t = editEndTime && editEndTime.trim();
-                                            if (!t) return;
-                                            updateSlot(slot.id, { endTime: t });
-                                            setIsEditingTime(false);
-                                        }}
-                                    >
-                                        Save
-                                    </button>
-                                    <button
-                                        className="secondary px-3"
-                                        onClick={() => setIsEditingTime(false)}
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            )}
+                        <div className="flex gap-2 items-center">
+                            <IoTime />
+                            <p>Until: {slot.endTime || "--:--"}</p>
                         </div>
-                        {slot.user &&
-                            <p className="flex gap-1">
-                                <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="6" r="4" stroke="#1C274C" strokeWidth="1.5" />
-                                    <path d="M15 20.6151C14.0907 20.8619 13.0736 21 12 21C8.13401 21 5 19.2091 5 17C5 14.7909 8.13401 13 12 13C15.866 13 19 14.7909 19 17C19 17.3453 18.9234 17.6804 18.7795 18" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round" />
-                                </svg>
-                                {slot.user}
-                            </p>}
+
+                        {slot.user && (
+                            <div className="flex flex-col gap-1">
+                                <p className="flex flex-wrap items-center gap-2 max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap">
+                                    <FaUser />
+                                    {slot.user}
+                                </p>
+                                <p className="flex flex-wrap items-center gap-2 max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap">
+                                    <FaPhoneAlt />
+                                    {slot.mobileNumber ? slot.mobileNumber : "No mobile"}
+                                </p>
+                                <p className="flex items-center gap-2">
+                                    <FaEnvelope />
+                                    <a className="text-slate-600 underline italic" href={`mailto:${slot.email}`} target="_blank" rel="noopener noreferrer">
+                                        {slot.email}
+                                    </a>
+                                </p>
+                                <p className="flex items-center gap-2">
+                                    <FaCar />
+                                    {slot.vehiclePlate}
+                                </p>
+                            </div>
+                        )}
                     </>
                 )}
 
-                {slot.reservation && (
-                    <p className="reservation flex gap-1">
-                        <svg fill="#000000" height="20px" width="20px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.001 512.001">
-                            <g>
-                                <g>
-                                    <path d="M511.747,374.302l-39.385-242.905c-1.547-9.535-9.779-16.542-19.439-16.542H59.078c-9.658,0-17.892,7.007-19.439,16.542
-			L0.254,374.302c-0.924,5.699,0.7,11.515,4.441,15.913c3.742,4.398,9.224,6.93,14.998,6.93h472.615
-			c5.773,0,11.256-2.534,14.998-6.93C511.048,385.818,512.672,380.001,511.747,374.302z M42.835,357.762l16.341-100.784
-			l16.341,100.784H42.835z M115.416,357.761v0.001L82.417,154.241h353.75l32.999,203.52H115.416z"/>
-                                </g>
-                            </g>
-                            <g>
-                                <g>
-                                    <path d="M393.847,236.309H157.539c-10.875,0-19.692,8.817-19.692,19.692c0,10.875,8.817,19.692,19.692,19.692h236.308
-			c10.875,0,19.692-8.817,19.692-19.692C413.539,245.126,404.722,236.309,393.847,236.309z"/>
-                                </g>
-                            </g>
-                        </svg>
-                        Reserved by {slot.reservation}
-                    </p>
+                {slot.reservationId && slot.occupied && (
+                    <div className="reservation flex flex-col gap-1">
+                        <p className="flex items-center gap-1">
+                            <FaUserFriends />
+                            Reserved by {slot.reservation}
+                        </p>
+                    </div>
+                )}
+
+                {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+
+                {isEditingTime && (
+                    <div className="mt-3 flex items-center gap-3">
+                        <input
+                            type="time"
+                            value={editEndTime}
+                            onChange={(e) => setEditEndTime(e.target.value)}
+                            className="rounded border px-3 py-2"
+                        />
+                        <button
+                            className="rounded border border-green-300 text-green-500 rounded px-3 py-2"
+                            onClick={() => {
+                                const t = editEndTime && editEndTime.trim();
+                                if (!t) return;
+                                updateSlot(slot.id, { endTime: t });
+                                setIsEditingTime(false);
+                            }}
+                        >
+                            Save
+                        </button>
+                        <button className="rounded border border-red-300 text-red-500 rounded px-3 py-2" onClick={() => setIsEditingTime(false)}>
+                            Cancel
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -170,112 +208,119 @@ export default function SlotCard({ slot, updateSlot }) {
                 {!slot.occupied && (
                     <>
                         <input
-                            placeholder="Name *"
-                            value={name}
-                            required
-                            onChange={e => setName(e.target.value)}
-                        />
-
-                        <input
                             type="time"
-                            placeholder="choose time"
+                            placeholder="Until time"
                             value={endTime}
-                            required
-                            onChange={e => setEndTime(e.target.value)}
+                            onChange={(e) => setEndTime(e.target.value)}
+                            className="block w-full rounded border px-3 py-2"
                         />
-
-                        {error && (
-                            <span style={{ color: "#dc2626", fontSize: "12px" }}>
-                                {error}
-                            </span>
-                        )}
 
                         <button
-                            disabled={!name.trim() || !endTime}
+                            className="w-full rounded bg-[#68C151] px-4 py-2 text-white disabled:bg-gray-400"
                             onClick={handleOccupy}
+                            disabled={hasOtherSlot}
                         >
                             Start Charging
                         </button>
+
+                        {/* {hasOtherSlot && !isCurrentReserver && (
+                            <p className="text-sm text-red-600 mt-2">
+                                You already have another active or reserved slot.
+                            </p>
+                        )} */}
                     </>
                 )}
 
-                {slot.occupied && (
+                {slot.occupied && !slot.reservationId && !isCurrentOccupant && (
                     <>
-                        {!slot.reservation && !currentUser && (
-                            <>
-                                <input
-                                    placeholder="Reserve name"
-                                    value={reservation}
-                                    onChange={e => setReservation(e.target.value)}
-                                />
-                                {error && (
-                                    <span style={{ color: "#dc2626", fontSize: "12px" }}>
-                                        {error}
-                                    </span>
-                                )}
-                                <button
-                                    className="!bg-purple-400"
-                                    onClick={handleReserve}
-                                >
-                                    Reserve Slot
-                                </button>
-                            </>
-                        )}
+                        <button
+                            className="w-full mt-3 bg-yellow-500 px-4 py-2 rounded text-white disabled:bg-gray-400"
+                            onClick={handleReserve}
+                            disabled={hasOtherSlot}
+                        >
+                            Reserve Slot
+                        </button>
+                        {/* {hasOtherSlot && (
+                            <p className="text-sm text-red-600 mt-2">
+                                You already have another active or reserved slot.
+                            </p>
+                        )} */}
+                    </>
+                )}
 
-                        {slot.reservation && currentUser && slot.reservation.trim() === currentUser.trim() && (
-                            <button
-                                className="secondary"
-                                onClick={() => {
-                                    try {
-                                        localStorage.removeItem('evUser');
-                                        setCurrentUser("");
-                                        updateSlot(slot.id, { reservation: "" })
-                                    } catch (e) {
-                                        // ignore
-                                    }
-                                }
-                                }
-                            >
-                                Unreserve
-                            </button>
-                        )}
+                {slot.occupied && slot.reservationId && isCurrentReserver && (
+                    <>
+                        <button
+                            className="w-full rounded px-4 py-2 bg-red-500 text-white"
+                            onClick={handleCancelReservation}
+                        >
+                            Cancel Reservation
+                        </button>
+                        {/* {hasOtherSlot && (
+                            <p className="text-sm text-red-600 mt-2">
+                                You already have another active or reserved slot.
+                            </p>
+                        )} */}
+                    </>
+                )}
 
-                        {slot.user && currentUser && slot.user.trim() === currentUser.trim() && (
-                            <>
-                                <button
-                                    className="danger"
-                                    onClick={() => {
-                                        if (slot.reservation && slot.reservation.trim()) {
-                                            updateSlot(slot.id, {
-                                                occupied: true,
-                                                user: slot.reservation,
-                                                endTime: "",
-                                                reservation: ""
-                                            })
-                                        } else {
-                                            updateSlot(slot.id, {
-                                                occupied: false,
-                                                user: "",
-                                                endTime: "",
-                                                reservation: ""
-                                            })
-                                        }
-                                        try {
-                                            localStorage.removeItem('evUser');
-                                            setCurrentUser("");
-                                        } catch (e) {
-                                            // ignore
-                                        }
-
-                                    }}
-                                >
-                                    Stop Charging
-                                </button>
-                            </>
-                        )}
+                {slot.occupied && isCurrentOccupant && (
+                    <>
+                        <button
+                            className="w-full flex items-center justify-center gap-1 bg-gray-300 rounded px-4 py-2 mt-3"
+                            onClick={() => {
+                                setEditEndTime(slot.endTime || "");
+                                setIsEditingTime(true);
+                            }}
+                        >
+                            <FaEdit /> Edit time
+                        </button>
+                        <button
+                            className="w-full rounded bg-red-500 px-4 py-2 text-white"
+                            onClick={handleStopCharging}
+                        >
+                            Stop Charging
+                        </button>
                     </>
                 )}
             </div>
         </div>
     );
 }
+
+
+{/* {isCurrentReserver && (
+              <div className="mt-3 flex flex-col gap-2">
+                <button
+                  className="w-full rounded bg-blue-500 px-4 py-2 text-white"
+                  onClick={handleOccupy}
+                >
+                  Start Charging
+                </button>
+                <button
+                  className="w-full rounded border border-slate-300 px-4 py-2 text-slate-700"
+                  onClick={handleCancelReservation}
+                >
+                  Cancel Reservation
+                </button>
+              </div>
+            )} */}
+
+{/* {!isCurrentReserver && (
+              <div className="mt-3 flex flex-col gap-2">
+                <button
+                  className="w-full rounded bg-blue-500 px-4 py-2 text-white"
+                  onClick={handleOccupy}
+                  disabled={hasOtherSlot}
+                >
+                  Start Charging
+                </button>
+                <button
+                  className="w-full rounded border border-slate-300 px-4 py-2 text-slate-700"
+                  onClick={handleReserve}
+                  disabled={hasOtherSlot}
+                >
+                  Reserve Slot
+                </button>
+              </div>
+            )} */}
