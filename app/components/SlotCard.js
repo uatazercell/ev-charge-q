@@ -40,6 +40,7 @@ export default function SlotCard({ slot, updateSlot, currentUser, allSlots }) {
             reservationId: userId,
             reservationEmail: currentUser?.email || "",
             reservationPlate: currentUser?.vehiclePlateNumber || "",
+            reservationMobileNumber: currentUser?.mobileNumber || "",
         });
         setEndTime("");
     };
