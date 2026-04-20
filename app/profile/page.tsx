@@ -220,7 +220,7 @@ export default function ProfilePage() {
         {loggingOut ? "Logging out..." : "Logout"}
       </button>
 
-      {userData?.uid === "oHlmNz1vUOZIjyZAZQJYAMIsdxJ2" && (
+      {userData?.uid == "oHlmNz1vUOZIjyZAZQJYAMIsdxJ2" || userData?.uid == "7WXahmPRkFW1M9RcI7GfAXy9JsA3" && (
         <button
           type="button"
           onClick={handleClearSlots}
