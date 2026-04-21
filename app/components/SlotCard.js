@@ -64,6 +64,7 @@ export default function SlotCard({ slot, updateSlot, currentUser, allSlots }) {
 
         updateSlot(slot.id, {
             occupied: true,
+            reminderSent: false,
             endTime: selectedEndTime,
             user: userName,
             email: currentUser?.email || "",
@@ -96,6 +97,7 @@ export default function SlotCard({ slot, updateSlot, currentUser, allSlots }) {
             // Transfer reservation to occupation
             updateSlot(slot.id, {
                 occupied: true,
+                reminderSent: false,
                 endTime: "",
                 user: slot.reservation,
                 email: slot.reservationEmail,

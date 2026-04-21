@@ -1,8 +1,7 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged, signOut, verifyBeforeUpdateEmail } from "firebase/auth";
 import { db, auth } from "@/app/lib/firebase";
 import { useRouter } from "next/navigation";
 import { IoArrowBack } from "react-icons/io5";
@@ -16,6 +15,14 @@ interface UserData {
   email: string;
   createdAt?: any;
 }
+
+const labels = [
+  { title: 'Name', name: 'name', required: true, type: 'text' },
+  { title: 'Surname', name: 'surname', required: true, type: 'text' },
+  { title: 'Vehicle Plate Numbe', name: 'vehiclePlateNumber', required: true, type: 'text' },
+  { title: 'Mobile number', name: 'mobileNumber', required: false, type: 'tel' },
+  { title: 'Email', name: 'email', required: true, type: 'email' },
+]
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -68,10 +75,11 @@ export default function ProfilePage() {
       };
 
       await updateDoc(doc(db, "users", userData.uid), updatedData);
+      auth.currentUser && await verifyBeforeUpdateEmail(auth.currentUser, updatedData.email);
       setUserData({ ...userData, ...updatedData });
       alert("Profile updated successfully!");
     } catch (err) {
-      setError("Error updating profile.");
+      setError("Error updating profile. " + err);
       console.error(err);
     } finally {
       setSaving(false);
@@ -125,6 +133,13 @@ export default function ProfilePage() {
   if (error) {
     return (
       <div className="container max-w-lg mx-auto py-12 px-4">
+        <button
+          type="button"
+          onClick={() => router.push("/")}
+          className="mb-4 px-4 py-2 rounded flex items-center gap-1"
+        >
+          <IoArrowBack /> Back
+        </button>
         <p className="text-red-500">{error}</p>
       </div>
     );
@@ -147,60 +162,19 @@ export default function ProfilePage() {
       </div>
 
       <form className="space-y-4" onSubmit={handleSave}>
-        <label className="block">
-          <span className="text-sm font-medium">Name</span>
-          <input
-            required
-            type="text"
-            name="name"
-            defaultValue={userData?.name || ""}
-            className="mt-1 block w-full rounded border px-3 py-2"
-          />
-        </label>
 
-        <label className="block">
-          <span className="text-sm font-medium">Surname</span>
-          <input
-            required
-            type="text"
-            name="surname"
-            defaultValue={userData?.surname || ""}
-            className="mt-1 block w-full rounded border px-3 py-2"
-          />
-        </label>
-
-        <label className="block">
-          <span className="text-sm font-medium">Vehicle Plate Number</span>
-          <input
-            required
-            type="text"
-            name="vehiclePlateNumber"
-            defaultValue={userData?.vehiclePlateNumber || ""}
-            className="mt-1 block w-full rounded border px-3 py-2"
-          />
-        </label>
-
-        <label className="block">
-          <span className="text-sm font-medium">Mobile Number</span>
-          <input
-            required
-            type="tel"
-            name="mobileNumber"
-            defaultValue={userData?.mobileNumber || ""}
-            className="mt-1 block w-full rounded border px-3 py-2"
-          />
-        </label>
-
-        <label className="block">
-          <span className="text-sm font-medium">Email</span>
-          <input
-            required
-            type="email"
-            name="email"
-            defaultValue={userData?.email || ""}
-            className="mt-1 block w-full rounded border px-3 py-2"
-          />
-        </label>
+        {labels.map(label => (
+          <label className="block" key={label.name}>
+            <span className="text-sm font-medium">{label.title}</span>
+            <input
+              required={label.required}
+              type={label.type}
+              name={label.name}
+              defaultValue={userData![label.name as keyof UserData] || ""}
+              className="mt-1 block w-full rounded border px-3 py-2"
+            />
+          </label>
+        ))}
 
         <button
           type="submit"
@@ -220,7 +194,7 @@ export default function ProfilePage() {
         {loggingOut ? "Logging out..." : "Logout"}
       </button>
 
-      {userData?.uid == "oHlmNz1vUOZIjyZAZQJYAMIsdxJ2" || userData?.uid == "7WXahmPRkFW1M9RcI7GfAXy9JsA3" && (
+      {(userData?.uid == "oHlmNz1vUOZIjyZAZQJYAMIsdxJ2" || userData?.uid == "7WXahmPRkFW1M9RcI7GfAXy9JsA3") && (
         <button
           type="button"
           onClick={handleClearSlots}
