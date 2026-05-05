@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { FaUser, FaUserFriends, FaEnvelope, FaCar, FaEdit, FaPhoneAlt } from "react-icons/fa";
-import { IoTime } from "react-icons/io5";
+import { FaUser, FaUserFriends, FaEnvelope, FaCar, FaPhoneAlt, FaRegPlayCircle, FaRegStopCircle } from "react-icons/fa";
+import { IoTime, IoTrashOutline } from "react-icons/io5";
+import { MdOutlineCancel, MdOutlineQueue } from "react-icons/md";
+import { CiEdit } from "react-icons/ci";
 
 
 export default function SlotCard({ slot, updateSlot, currentUser, allSlots }) {
@@ -141,28 +143,28 @@ export default function SlotCard({ slot, updateSlot, currentUser, allSlots }) {
                 {slot.occupied && (
                     <>
                         <div className="flex gap-2 items-center">
-                            <IoTime />
+                            <IoTime color="darkGoldenRod" />
                             <p>Until: {slot.endTime || "--:--"}</p>
                         </div>
 
                         {slot.user && (
                             <div className="flex flex-col gap-1">
                                 <p className="flex flex-wrap items-center gap-2 max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap">
-                                    <FaUser />
+                                    <FaUser color="indigo" />
                                     {slot.user}
                                 </p>
                                 <p className="flex flex-wrap items-center gap-2 max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap">
-                                    <FaPhoneAlt />
+                                    <FaPhoneAlt color="seaGreen" />
                                     {slot.mobileNumber ? slot.mobileNumber : "No mobile"}
                                 </p>
                                 <p className="flex items-center gap-2">
-                                    <FaEnvelope />
+                                    <FaEnvelope color="skyBlue" />
                                     <a className="text-slate-600 underline italic" href={`mailto:${slot.email}`} target="_blank" rel="noopener noreferrer">
                                         {slot.email}
                                     </a>
                                 </p>
                                 <p className="flex items-center gap-2">
-                                    <FaCar />
+                                    <FaCar color="navy" />
                                     {slot.vehiclePlate}
                                 </p>
                             </div>
@@ -173,7 +175,7 @@ export default function SlotCard({ slot, updateSlot, currentUser, allSlots }) {
                 {slot.reservationId && slot.occupied && (
                     <div className="reservation flex flex-col gap-1">
                         <p className="flex items-center gap-1">
-                            <FaUserFriends />
+                            <FaUserFriends color="darkOrange" />
                             Reserved by {slot.reservation}
                         </p>
                     </div>
@@ -219,51 +221,35 @@ export default function SlotCard({ slot, updateSlot, currentUser, allSlots }) {
                         />
 
                         <button
-                            className="w-full rounded bg-[#68C151] px-4 py-2 text-white disabled:bg-gray-400"
+                            className="w-full rounded bg-[#68C151] px-4 py-2 text-white disabled:bg-gray-400 flex items-center justify-center gap-1"
                             onClick={handleOccupy}
                             disabled={hasOtherSlot}
                         >
-                            Start Charging
+                            <FaRegPlayCircle /> Start Charging
                         </button>
-
-                        {/* {hasOtherSlot && !isCurrentReserver && (
-                            <p className="text-sm text-red-600 mt-2">
-                                You already have another active or reserved slot.
-                            </p>
-                        )} */}
                     </>
                 )}
 
                 {slot.occupied && !slot.reservationId && !isCurrentOccupant && (
                     <>
                         <button
-                            className="w-full mt-3 bg-yellow-500 px-4 py-2 rounded text-white disabled:bg-gray-400"
+                            className="w-full mt-3 bg-yellow-500 px-4 py-2 rounded text-white disabled:bg-gray-400 flex items-center justify-center gap-1"
                             onClick={handleReserve}
                             disabled={hasOtherSlot}
                         >
-                            Reserve Slot
+                            <MdOutlineQueue /> Reserve Slot
                         </button>
-                        {/* {hasOtherSlot && (
-                            <p className="text-sm text-red-600 mt-2">
-                                You already have another active or reserved slot.
-                            </p>
-                        )} */}
                     </>
                 )}
 
                 {slot.occupied && slot.reservationId && isCurrentReserver && (
                     <>
                         <button
-                            className="w-full rounded px-4 py-2 bg-red-500 text-white"
+                            className="w-full rounded px-4 py-2 bg-red-500 text-white flex items-center justify-center gap-1"
                             onClick={handleCancelReservation}
                         >
-                            Cancel Reservation
+                            <MdOutlineCancel /> Cancel Reservation
                         </button>
-                        {/* {hasOtherSlot && (
-                            <p className="text-sm text-red-600 mt-2">
-                                You already have another active or reserved slot.
-                            </p>
-                        )} */}
                     </>
                 )}
 
@@ -276,13 +262,24 @@ export default function SlotCard({ slot, updateSlot, currentUser, allSlots }) {
                                 setIsEditingTime(true);
                             }}
                         >
-                            <FaEdit /> Edit time
+                            <CiEdit /> Edit time
                         </button>
                         <button
-                            className="w-full rounded bg-red-500 px-4 py-2 text-white"
+                            className="w-full rounded bg-red-500 px-4 py-2 text-white flex items-center justify-center gap-1"
                             onClick={handleStopCharging}
                         >
-                            Stop Charging
+                            <FaRegStopCircle /> Stop Charging
+                        </button>
+                    </>
+                )}
+
+                {slot.occupied && (userId == "oHlmNz1vUOZIjyZAZQJYAMIsdxJ2" || userId == "7WXahmPRkFW1M9RcI7GfAXy9JsA3") && (
+                    <>
+                        <button
+                            className="w-full rounded bg-violet-500 px-4 py-2 text-white flex items-center justify-center gap-1"
+                            onClick={handleStopCharging}
+                        >
+                            <IoTrashOutline /> Remove Occupancy
                         </button>
                     </>
                 )}
