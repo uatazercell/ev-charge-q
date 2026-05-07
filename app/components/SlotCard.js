@@ -130,6 +130,12 @@ export default function SlotCard({ slot, updateSlot, currentUser, allSlots }) {
         }
     };
 
+    const confirmHandleStopCharging = () => {
+        if (window.confirm("Are you sure you want to remove occupancy?")) {
+            handleStopCharging();
+        }
+    };
+
     return (
         <div className="card shadow">
             <div className="card-header">
@@ -277,7 +283,7 @@ export default function SlotCard({ slot, updateSlot, currentUser, allSlots }) {
                     <>
                         <button
                             className="w-full rounded bg-violet-500 px-4 py-2 text-white flex items-center justify-center gap-1"
-                            onClick={handleStopCharging}
+                            onClick={confirmHandleStopCharging}
                         >
                             <IoTrashOutline /> Remove Occupancy
                         </button>
